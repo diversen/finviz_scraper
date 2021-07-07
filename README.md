@@ -1,6 +1,6 @@
 # Simple scraper for finviz stock data
 
-A simple scrapper for finviz data which will cache data in a sqlite database. 
+A simple scraper for finviz data which will cache data in a sqlite database. 
 
 Export data to CSV files. 
 
@@ -8,9 +8,9 @@ It may stop working when [https://finviz.com/](finviz) modifies HTML layout.
 
 ## Installl
 
-    git clone https://github.com/diversen/finviz-scrapper
+    git clone https://github.com/diversen/finviz_scraper
 
-    cd finviz-scrapper
+    cd finviz_scraper
 
     virtualenv venv
 
@@ -31,6 +31,4 @@ Save sp500 as a CSV file in `./csv/`
 Or save nasdaq symbols as a CSV file in `./csv`:
 
     python csv_from_nasdaq.py
-
-
 
