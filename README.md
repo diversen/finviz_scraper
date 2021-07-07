@@ -20,11 +20,11 @@ It may stop working when [https://finviz.com/](finviz) modifies HTML layout.
 
 ## Example
 
-Se test.py which fetches a single symbol (stock)
+Se test_get_fundamentals.py which fetches a single symbol in some different ways
 
-    python test.py
+    python test_get_fundamentals.py
 
-Save sp500 as a CSV file in `./csv/`
+Save sp500 as a CSV file in the folder `./csv`
 
     python csv_from_sp500.py
 
