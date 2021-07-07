@@ -1,4 +1,4 @@
-from finviz_scrapper.finviz import get_fundamentals_cleaned, get_fundamentals_df, get_fundamentals_dict_raw
+from finviz_scraper.finviz import get_fundamentals_cleaned, get_fundamentals_df, get_fundamentals_dict_raw
 
 symbol = 'AAL'
 
