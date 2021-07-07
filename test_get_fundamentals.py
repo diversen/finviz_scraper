@@ -12,5 +12,5 @@ symbol_raw_dict = get_fundamentals_dict_raw(symbol)
 # M, B, T are turned into floatts. '2M' => 2000000
 # Percentages are turned into floats. '10%' => 0.1
 # Empty values '-' are turned into np.nan
-aapl = get_fundamentals_cleaned('aapl')
+aapl = get_fundamentals_cleaned(symbol)
 print(aapl)
