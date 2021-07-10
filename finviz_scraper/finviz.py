@@ -134,7 +134,7 @@ def get_fundamentals_cleaned(symbol):
     for key, value in ticker.items():
         ticker[key] = _sanitize_value(value)
 
-    ticker['ticker'] = symbol
+    ticker['Ticker'] = symbol
     return ticker
 
 
