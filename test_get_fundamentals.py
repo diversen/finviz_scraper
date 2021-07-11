@@ -1,6 +1,6 @@
 from finviz_scraper.finviz import get_fundamentals_cleaned, get_fundamentals_df, get_fundamentals_dict_raw
 
-symbol = 'AAL'
+symbol = 'AECO'
 
 # Get fundamentals as a pandas dataframe, values are as found on finviz
 symbol_df = get_fundamentals_df(symbol)

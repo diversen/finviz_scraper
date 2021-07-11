@@ -47,32 +47,51 @@ def get_fundamentals_df(symbol):
     else:
         print("Got ticker from cache: " + symbol)
 
+    # industry, sector, country
+    base_info = pd.read_html(str(html), attrs={'class': 'fullview-title'})[0]
+    
+    company_name = base_info[0][1]
+    base_info = base_info[0][2].split('|')    
+    base_info= [item.replace(" ", "") for item in base_info]
+  
+    col_one = []
+    col_one.append(pd.Series(['Company']))
+    col_one.append(pd.Series(['Sector']))
+    col_one.append(pd.Series(['Industry']))
+
     # Find fundamentals table
-    fundamentals = pd.read_html(
-        str(html), attrs={'class': 'snapshot-table2'})[0]
+    fundamentals = pd.read_html(str(html), attrs={'class': 'snapshot-table2'})[0]
 
     # Clean up fundamentals dataframe
-    fundamentals.columns = ['0', '1', '2', '3',
-                            '4', '5', '6', '7', '8', '9', '10', '11']
-    colOne = []
-    colLength = len(fundamentals)
-    for k in np.arange(0, colLength, 2):
+    fundamentals.columns = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+    
+    col_length = len(fundamentals)
+    for k in np.arange(0, col_length, 2):
         val = fundamentals[f'{k}']
-        colOne.append(val)
-    attrs = pd.concat(colOne, ignore_index=True)
+        col_one.append(val)
 
-    colTwo = []
-    colLength = len(fundamentals)
-    for k in np.arange(1, colLength, 2):
+    attrs = pd.concat(col_one, ignore_index=True)
+    
+    col_two = []
+    col_two.append(pd.Series([company_name]))
+    col_two.append(pd.Series([base_info[0]]))
+    col_two.append(pd.Series([base_info[1]]))
+
+    col_length = len(fundamentals)
+    for k in np.arange(1, col_length, 2):
         val = fundamentals[f'{k}']
-        colTwo.append(val)
-    vals = pd.concat(colTwo, ignore_index=True)
+        col_two.append(val)
 
-    fundamentals = pd.DataFrame()
-    fundamentals['Attributes'] = attrs
-    fundamentals['Values'] = vals
-    fundamentals = fundamentals.set_index('Attributes')
-    return fundamentals
+    # col_two.append(company_name)
+    vals = pd.concat(col_two, ignore_index=True)
+
+
+    df = pd.DataFrame()
+    df['Attributes'] = attrs
+    df['Values'] = vals
+    df = df.set_index('Attributes')
+
+    return df
 
 
 def _convertable_to_float(s):
@@ -148,6 +167,7 @@ def get_tickers_df(tickers, max_n=False, show_tracekack=False):
             data = get_fundamentals_cleaned(ticker)
 
             if not data:
+                print('DOH')
                 print('No data in {}'.format(ticker))
                 continue
 
@@ -166,7 +186,6 @@ def get_tickers_df(tickers, max_n=False, show_tracekack=False):
         if max_n and n > max_n:
             break
 
-    df['Price Feature'] = df['Price']
     return df
 
 
