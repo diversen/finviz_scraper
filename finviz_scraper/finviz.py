@@ -3,15 +3,15 @@ import numpy as np
 from bs4 import BeautifulSoup as soup
 from urllib.request import Request, urlopen
 import urllib.error
-
 from sqlite_cache.sqlite_cache import SqliteCache
 import time
 import logging
 import traceback
 import os
+import logging, sys
 
 sql_cache = SqliteCache('cache')
-
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 def get_fundamentals_df(symbol):
     """
@@ -35,7 +35,7 @@ def get_fundamentals_df(symbol):
             webpage = urlopen(req).read()
             html = soup(webpage, "html.parser")
             sql_cache.set(symbol, str(html))
-            print("Got ticker from finviz:", symbol)
+            logging.debug("Got ticker from finviz:", symbol)
 
         except urllib.error.HTTPError as HTTPError:
             if HTTPError.code == 404:
@@ -45,7 +45,7 @@ def get_fundamentals_df(symbol):
                 raise(HTTPError)
 
     else:
-        print("Got ticker from cache: " + symbol)
+        logging.debug("Got ticker from cache: " + symbol)
 
     # industry, sector, country
     base_info = pd.read_html(str(html), attrs={'class': 'fullview-title'})[0]
@@ -157,30 +157,30 @@ def get_fundamentals_cleaned(symbol):
     return ticker
 
 
-def get_tickers_df(tickers, max_n=False, show_tracekack=False):
+def get_tickers_df(tickers, max_n=False, show_traceback=False):
     """ Get tickers as a dataframe """
 
     n = 0
     df = pd.DataFrame()
     for ticker in tickers:
         try:
+
             data = get_fundamentals_cleaned(ticker)
 
             if not data:
-                print('DOH')
-                print('No data in {}'.format(ticker))
+                logging.debug('No data in {}'.format(ticker))
                 continue
 
             df = df.append(data, ignore_index=True)
 
         except Exception as e:
 
-            if show_tracekack:
+            if show_traceback:
                 logging.warning('Failed fetching {}'.format(ticker))
                 tb = traceback.format_exc()
                 logging.warning(tb)
             else:
-                print(e)
+                logging.debug(e)
 
         n += 1
         if max_n and n > max_n:
