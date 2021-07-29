@@ -35,7 +35,7 @@ def get_fundamentals_df(symbol):
             webpage = urlopen(req).read()
             html = soup(webpage, "html.parser")
             sql_cache.set(symbol, str(html))
-            logging.debug("Got ticker from finviz:", symbol)
+            logging.debug("Got ticker from finviz: " + symbol)
 
         except urllib.error.HTTPError as HTTPError:
             if HTTPError.code == 404:

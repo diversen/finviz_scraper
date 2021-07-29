@@ -49,7 +49,6 @@ def tickers_nasdaq100():
     nasdaq100 = pd.read_html(
         "https://en.wikipedia.org/wiki/Nasdaq-100")[3]
 
-    print(nasdaq100)
     tickers = sorted(nasdaq100.Ticker.tolist())
 
 
