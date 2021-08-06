@@ -30,12 +30,21 @@ def get_fundamentals_df(symbol):
         try:
 
             time.sleep(1)
+            
+            url_str = "http://finviz.com/quote.ashx?t=" + symbol.lower()
             url = ("http://finviz.com/quote.ashx?t=" + symbol.lower())
+            logging.debug("Getting URL: " + url_str)
+
             req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            webpage = urlopen(req).read()
+            webpage = urlopen(req, timeout=30).read()
+            logging.debug("URL open: " + url_str)
+            
             html = soup(webpage, "html.parser")
+            logging.debug("Parsed URL: " + url_str)
+
             sql_cache.set(symbol, str(html))
-            logging.debug("Got ticker from finviz: " + symbol)
+            logging.debug("Got (and cached) ticker from finviz: " + symbol)
+            logging.debug('---')
 
         except urllib.error.HTTPError as HTTPError:
             if HTTPError.code == 404:
@@ -46,6 +55,7 @@ def get_fundamentals_df(symbol):
 
     else:
         logging.debug("Got ticker from cache: " + symbol)
+        logging.debug('---')
 
     # industry, sector, country
     base_info = pd.read_html(str(html), attrs={'class': 'fullview-title'})[0]
@@ -169,6 +179,7 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
 
             if not data:
                 logging.debug('No data in {}'.format(ticker))
+                logging.debug('---')
                 continue
 
             df = df.append(data, ignore_index=True)
@@ -179,8 +190,10 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
                 logging.warning('Failed fetching {}'.format(ticker))
                 tb = traceback.format_exc()
                 logging.warning(tb)
+                logging.debug('---')
             else:
                 logging.debug(e)
+                logging.debug('---')
 
         n += 1
         if max_n and n > max_n:

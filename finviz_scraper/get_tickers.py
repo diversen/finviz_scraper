@@ -96,3 +96,14 @@ def tickers_c25():
 
         # sp_tickers[i] += '.CO'
     return sp_tickers
+
+def tickers_all ():
+    sp500 = tickers_sp500()
+    nasdaq = tickers_nasdaq()
+    others = tickers_other()
+
+    all = sp500 + nasdaq + others 
+
+    return sorted(list(set(all)))
+
+
