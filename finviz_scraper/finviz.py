@@ -176,7 +176,7 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
         try:
 
             data = get_fundamentals_cleaned(ticker)
-
+            time.sleep(0.2)
             if not data:
                 logging.debug('No data in {}'.format(ticker))
                 logging.debug('---')
