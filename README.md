@@ -4,8 +4,6 @@ A simple scraper for finviz data which will cache data in a sqlite database.
 
 Export data to CSV files. 
 
-It may stop working when [https://finviz.com/](finviz) modifies HTML layout.
-
 ## Installl
 
     git clone https://github.com/diversen/finviz_scraper

@@ -1,6 +1,6 @@
 from finviz_scraper.finviz import get_fundamentals_cleaned, get_fundamentals_df, get_fundamentals_dict_raw
 
-symbol = 'AECO'
+symbol = 'AAPL'
 
 # Get fundamentals as a pandas dataframe, values are as found on finviz
 symbol_df = get_fundamentals_df(symbol)
@@ -12,5 +12,5 @@ symbol_raw_dict = get_fundamentals_dict_raw(symbol)
 # M, B, T are turned into floatts. '2M' => 2000000
 # Percentages are turned into floats. '10%' => 0.1
 # Empty values '-' are turned into np.nan
-aapl = get_fundamentals_cleaned(symbol)
-print(aapl)
+symbol_data = get_fundamentals_cleaned(symbol)
+print(symbol_data)
