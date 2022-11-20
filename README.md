@@ -1,6 +1,6 @@
 # Simple scraper for finviz stock data
 
-A simple scraper for finviz data which will cache data in a sqlite database. 
+A simple scraper for finviz data which will cache data in a sqlite database.
 
 Export data to CSV files. 
 
