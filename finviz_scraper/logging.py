@@ -9,7 +9,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 log = logging.getLogger("main")
-level = logging.DEBUG
+level = logging.INFO
 log.setLevel(level)
 
 
