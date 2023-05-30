@@ -5,13 +5,14 @@ from urllib.request import Request, urlopen
 import urllib.error
 from sqlite_cache.sqlite_cache import SqliteCache
 import time
-import logging
 import traceback
 import os
-import logging, sys
+from .logging import get_log
 
+
+log = get_log()
 sql_cache = SqliteCache('cache')
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+
 
 def get_fundamentals_df(symbol):
     """
@@ -32,19 +33,19 @@ def get_fundamentals_df(symbol):
             time.sleep(1)
             
             url_str = "http://finviz.com/quote.ashx?t=" + symbol.lower()
-            url = ("http://finviz.com/quote.ashx?t=" + symbol.lower())
-            logging.debug("Getting URL: " + url_str)
+            url = "http://finviz.com/quote.ashx?t=" + symbol.lower()
+            log.debug("Getting URL: " + url_str)
 
             req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             webpage = urlopen(req, timeout=30).read()
-            logging.debug("URL open: " + url_str)
+            log.debug("URL open: " + url_str)
             
             html = soup(webpage, "html.parser")
-            logging.debug("Parsed URL: " + url_str)
+            log.debug("Parsed URL: " + url_str)
 
             sql_cache.set(symbol, str(html))
-            logging.debug("Got (and cached) ticker from finviz: " + symbol)
-            logging.debug('---')
+            log.debug("Got (and cached) ticker from finviz: " + symbol)
+            log.debug('---')
 
         except urllib.error.HTTPError as HTTPError:
             if HTTPError.code == 404:
@@ -54,14 +55,15 @@ def get_fundamentals_df(symbol):
                 raise(HTTPError)
 
     else:
-        logging.debug("Got ticker from cache: " + symbol)
-        logging.debug('---')
+        log.debug("Got ticker from cache: " + symbol)
+        log.debug('---')
 
     # industry, sector, country
     base_info = pd.read_html(str(html), attrs={'class': 'fullview-title'})[0]
     
-    company_name = base_info[0][1]
-    base_info = base_info[0][2].split('|')    
+    company_name = base_info[0][0].split('|')[1].strip()
+
+    base_info = base_info[0][1] .split('|')    
     base_info= [item.replace(" ", "") for item in base_info]
   
     col_one = []
@@ -178,8 +180,8 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
             data = get_fundamentals_cleaned(ticker)
             time.sleep(0.2)
             if not data:
-                logging.debug('No data in {}'.format(ticker))
-                logging.debug('---')
+                log.debug('No data in {}'.format(ticker))
+                log.debug('---')
                 continue
 
             df = df.append(data, ignore_index=True)
@@ -187,13 +189,13 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
         except Exception as e:
 
             if show_traceback:
-                logging.warning('Failed fetching {}'.format(ticker))
+                log.warning('Failed fetching {}'.format(ticker))
                 tb = traceback.format_exc()
-                logging.warning(tb)
-                logging.debug('---')
+                log.warning(tb)
+                log.debug('---')
             else:
-                logging.debug(e)
-                logging.debug('---')
+                log.debug(e)
+                log.debug('---')
 
         n += 1
         if max_n and n > max_n:
