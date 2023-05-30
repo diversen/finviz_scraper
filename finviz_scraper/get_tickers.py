@@ -47,11 +47,9 @@ def tickers_nasdaq100():
     '''Downloads list of tickers currently listed in the S&P 500 '''
     # get list of all S&P 500 stocks
     nasdaq100 = pd.read_html(
-        "https://en.wikipedia.org/wiki/Nasdaq-100")[3]
+        "https://en.wikipedia.org/wiki/Nasdaq-100")[4]
 
     tickers = sorted(nasdaq100.Ticker.tolist())
-
-
     for i, ticker in enumerate(tickers):
         if '.' in ticker:
             tickers[i] = ticker.replace('.', '-')
