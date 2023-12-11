@@ -18,10 +18,6 @@ Export data to CSV files.
 
 ## Example
 
-Se test_get_fundamentals.py which fetches a single symbol in some different ways
-
-    python test_get_fundamentals.py
-
 Save sp500 as a CSV file in the folder `./csv`
 
     python csv_from_sp500.py
