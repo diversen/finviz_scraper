@@ -25,19 +25,14 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
                 log.debug("Fetching {}".format(ticker))
                 soup = finviz_data.get_soup(ticker)
                 sql_cache.set(str(ticker), str(soup))
-                data = finviz_data.get_fundamentals_float(soup)
-
+                time.sleep(0.2)
             else:
                 log.debug("Fetching {} from cache".format(ticker))
                 soup = BeautifulSoup(html, "html.parser")
-                data = finviz_data.get_fundamentals_float(soup)
 
-            time.sleep(0.2)
-            if not data:
-                log.debug("No data in {}".format(ticker))
-                log.debug("---")
-                continue
-
+            data = finviz_data.get_fundamentals_float(soup)
+            company = finviz_data.get_company_info(soup)
+            data = {**company, **data}
             df = df.append(data, ignore_index=True)
 
         except Exception as e:
