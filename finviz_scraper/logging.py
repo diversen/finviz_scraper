@@ -3,13 +3,14 @@ import logging
 import os
 from pathlib import Path
 import warnings
+from logging.handlers import RotatingFileHandler
 
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 log = logging.getLogger("main")
-level = logging.INFO
+level = logging.DEBUG
 log.setLevel(level)
 
 
@@ -23,7 +24,7 @@ def generate_log_dir():
 
 
 def get_file_handler(level: Any):
-    fh = logging.FileHandler("logs/main.log")
+    fh = RotatingFileHandler("logs/main.log", maxBytes=5000000, backupCount=3)
     fh.setLevel(level)
     fh.setFormatter(formatter)
     return fh
@@ -37,7 +38,6 @@ def get_stream_handler(level: Any):
 
 
 if not len(log.handlers):
-    
     generate_log_dir()
     fh = get_file_handler(level)
     log.addHandler(fh)
