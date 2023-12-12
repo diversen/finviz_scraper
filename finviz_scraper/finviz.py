@@ -38,12 +38,13 @@ def get_tickers_df(tickers, max_tickers=False):
             # Reset backoff time after successful fetch
             backoff_time = 0.2
 
-        except Exception:
+        except Exception as e:
             log.warning(
                 "Failed fetching {}, backing off for {} seconds".format(
                     ticker, backoff_time
                 )
             )
+            log.exception(e)
             time.sleep(backoff_time)
 
         n += 1

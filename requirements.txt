@@ -3,7 +3,7 @@ beautifulsoup4==4.12.2
 bs4==0.0.1
 certifi==2023.11.17
 charset-normalizer==3.3.2
-finviz-data @ git+https://github.com/diversen/finviz-data@b31ff46ee444baed289467171a3f4bce87e4e728
+finviz-data @ git+https://github.com/diversen/finviz-data@dc68498f8be2c231cabe00b386ea114e494e323a
 html5lib==1.1
 idna==3.6
 lxml==4.9.1
