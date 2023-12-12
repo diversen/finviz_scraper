@@ -1,8 +1,8 @@
 # Simple scraper for finviz stock data
 
-A simple scraper for finviz data which will cache data in a sqlite database.
+Some simple script for fetching stock data from finviz.com and export the data to CSV files.
 
-Export data to CSV files. 
+It uses this small lib [finviz-data](https://github.com/diversen/finviz-data) for fetching and extracting the data.
 
 ## Installl
 
@@ -25,4 +25,3 @@ Save sp500 as a CSV file in the folder `./csv`
 Or save nasdaq symbols as a CSV file in `./csv`:
 
     python csv_from_nasdaq.py
-

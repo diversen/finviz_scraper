@@ -2,22 +2,22 @@ from finviz_data import finviz_data
 from finviz_scraper.logging import get_log
 import pandas as pd
 import time
-import traceback
 import os
 from sqlite_cache.sqlite_cache import SqliteCache
 from bs4 import BeautifulSoup
 
 
 sql_cache = SqliteCache("cache")
-
 log = get_log()
 
 
-def get_tickers_df(tickers, max_n=False, show_traceback=False):
-    """Get tickers as a dataframe"""
+def get_tickers_df(tickers, max_tickers=False):
+    """Get tickers as a dataframe with exponential backoff on failure."""
 
     n = 0
+    backoff_time = 0.2  # Initial backoff time in seconds
     df = pd.DataFrame()
+
     for ticker in tickers:
         try:
             html = sql_cache.get(ticker)
@@ -25,7 +25,7 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
                 log.debug("Fetching {}".format(ticker))
                 soup = finviz_data.get_soup(ticker)
                 sql_cache.set(str(ticker), str(soup))
-                time.sleep(0.2)
+                time.sleep(0.2)  # Throttling requests
             else:
                 log.debug("Fetching {} from cache".format(ticker))
                 soup = BeautifulSoup(html, "html.parser")
@@ -35,18 +35,19 @@ def get_tickers_df(tickers, max_n=False, show_traceback=False):
             data = {**company, **data}
             df = df.append(data, ignore_index=True)
 
-        except Exception as e:
-            if show_traceback:
-                log.warning("Failed fetching {}".format(ticker))
-                tb = traceback.format_exc()
-                log.warning(tb)
-                log.debug("---")
-            else:
-                log.debug(e)
-                log.debug("---")
+            # Reset backoff time after successful fetch
+            backoff_time = 0.2
+
+        except Exception:
+            log.warning(
+                "Failed fetching {}, backing off for {} seconds".format(
+                    ticker, backoff_time
+                )
+            )
+            time.sleep(backoff_time)
 
         n += 1
-        if max_n and n > max_n:
+        if max_tickers and n >= max_tickers:
             break
 
     return df
