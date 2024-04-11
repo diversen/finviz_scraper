@@ -5,6 +5,7 @@ import time
 import os
 from sqlite_cache.sqlite_cache import SqliteCache
 from bs4 import BeautifulSoup
+import random
 
 
 sql_cache = SqliteCache("cache")
@@ -15,7 +16,8 @@ def get_tickers_df(tickers, max_tickers=False):
     """Get tickers as a dataframe with exponential backoff on failure."""
 
     n = 0
-    backoff_time = 0.2  # Initial backoff time in seconds
+    backoff_time = 5  # Initial backoff time in seconds
+
     df = pd.DataFrame()
 
     for ticker in tickers:
@@ -25,7 +27,12 @@ def get_tickers_df(tickers, max_tickers=False):
                 log.debug("Fetching {}".format(ticker))
                 soup = finviz_data.get_soup(ticker)
                 sql_cache.set(str(ticker), str(soup))
-                time.sleep(0.2)  # Throttling requests
+
+                # get random sleep interval to avoid getting blocked
+                # between 5 and 10 seconds
+                random_sleep = random.randint(5, 15)
+
+                time.sleep(random_sleep)  # Throttling requests
             else:
                 log.debug("Fetching {} from cache".format(ticker))
                 soup = BeautifulSoup(html, "html.parser")
@@ -36,9 +43,11 @@ def get_tickers_df(tickers, max_tickers=False):
             df = df.append(data, ignore_index=True)
 
             # Reset backoff time after successful fetch
-            backoff_time = 0.2
+            backoff_time = 2
 
         except Exception as e:
+
+            backoff_time = backoff_time * 2
             log.warning(
                 "Failed fetching {}, backing off for {} seconds".format(
                     ticker, backoff_time
