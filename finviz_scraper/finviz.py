@@ -50,7 +50,6 @@ def get_tickers_df(tickers, max_tickers=False):
 
         except Exception as e:
 
-            back_off_time = back_off_time * 2
             log.warning(
                 "Failed fetching {}, backing off for {} seconds".format(
                     ticker, back_off_time
@@ -58,6 +57,9 @@ def get_tickers_df(tickers, max_tickers=False):
             )
             log.exception(e)
             time.sleep(back_off_time)
+
+            # Exponential backoff
+            back_off_time = back_off_time * 2
 
         n += 1
         if max_tickers and n >= max_tickers:
