@@ -16,6 +16,8 @@ It uses this small lib [finviz-data](https://github.com/diversen/finviz-data) fo
 
     pip install -r requirements.txt
 
+    cp settings.py-dist settings.py
+
 ## Example
 
 Save sp500 as a CSV file in the folder `./csv`
