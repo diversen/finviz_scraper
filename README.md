@@ -1,4 +1,4 @@
-# Simple scraper for finviz stock data
+# Simple scraper for finviz fundamentals data
 
 Some simple script for fetching stock data from finviz.com and export the data to CSV files.
 
