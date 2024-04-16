@@ -30,7 +30,6 @@ def get_tickers_df(tickers, max_tickers=False):
                 sql_cache.set(str(ticker), str(soup))
 
                 # get random sleep interval to avoid getting blocked
-                # between 5 and 10 seconds
                 random_sleep = random.randint(
                     settings["sleep_min"], settings["sleep_max"]
                 )
@@ -60,6 +59,10 @@ def get_tickers_df(tickers, max_tickers=False):
 
             # Exponential backoff
             back_off_time = back_off_time * 2
+
+            max_back_off_time = settings["max_back_off_time"]
+            if back_off_time > max_back_off_time:
+                back_off_time = max_back_off_time
 
         n += 1
         if max_tickers and n >= max_tickers:
