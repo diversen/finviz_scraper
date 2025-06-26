@@ -42,7 +42,7 @@ def get_tickers_df(tickers, max_tickers=False):
             data = finviz_data.get_fundamentals_float(soup)
             company = finviz_data.get_company_info(soup)
             data = {**company, **data}
-            df = df.append(data, ignore_index=True)
+            df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
 
             # Reset backoff time after successful fetch
             back_off_time = settings["back_off_time"]
