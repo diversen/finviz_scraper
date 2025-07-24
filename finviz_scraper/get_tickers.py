@@ -94,10 +94,12 @@ def tickers_c25():
 
 
 def tickers_all():
+    
     sp500 = tickers_sp500()
     nasdaq = tickers_nasdaq()
     others = tickers_other()
+    c25 = tickers_c25()
 
-    all = sp500 + nasdaq + others
+    all = sp500 + nasdaq + others + c25
 
     return sorted(list(set(all)))
