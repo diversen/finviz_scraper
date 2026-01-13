@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
-import io
 import ftplib
+import hashlib
+import io
+import os
+import time
+from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -12,16 +16,86 @@ import requests
 
 # ---------- helpers ----------
 
-_UA = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+# Identify your script + contact (recommended for automated access).
+_UA = "finviz_scraper/1.0 (contact: you@example.com) requests/2.x"
+
+# Simple disk cache (1 file per URL)
+_CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "finviz_scraper"
+_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+_CACHE_TTL_SECONDS = 24 * 60 * 60  # 24 hours
+
+# Reuse a session (connection pooling) + shared headers
+_session = requests.Session()
+_session.headers.update(
+    {
+        "User-Agent": _UA,
+        "Accept-Encoding": "gzip",
+    }
 )
+
+# Gentle pacing to avoid request bursts
+_last_request_ts = 0.0
+_MIN_INTERVAL_SECONDS = 1.5
+
+
+def _cache_path(url: str) -> Path:
+    h = hashlib.sha1(url.encode("utf-8")).hexdigest()
+    return _CACHE_DIR / f"{h}.html"
 
 
 def _fetch_html(url: str) -> str:
-    r = requests.get(url, headers={"User-Agent": _UA}, timeout=30)
-    r.raise_for_status()
-    return r.text
+    """
+    Fetch HTML with:
+      - 24h on-disk caching
+      - polite pacing between requests
+      - retries with exponential backoff (and Retry-After if provided)
+    """
+    global _last_request_ts
+
+    # 1) Cache
+    p = _cache_path(url)
+    if p.exists():
+        age = time.time() - p.stat().st_mtime
+        if age < _CACHE_TTL_SECONDS:
+            return p.read_text(encoding="utf-8", errors="ignore")
+
+    # 2) Pacing (avoid bursts)
+    now = time.time()
+    wait = _MIN_INTERVAL_SECONDS - (now - _last_request_ts)
+    if wait > 0:
+        time.sleep(wait)
+
+    # 3) Retry with backoff
+    backoff = 5.0
+    last_response: requests.Response | None = None
+
+    for _ in range(5):
+        r = _session.get(url, timeout=30)
+        last_response = r
+        _last_request_ts = time.time()
+
+        if r.status_code == 200:
+            text = r.text
+            p.write_text(text, encoding="utf-8", errors="ignore")
+            return text
+
+        if r.status_code in (403, 429):
+            ra = r.headers.get("Retry-After")
+            if ra and ra.isdigit():
+                sleep_s = int(ra)
+            else:
+                sleep_s = int(backoff)
+                backoff = min(backoff * 2, 120)
+
+            time.sleep(sleep_s)
+            continue
+
+        r.raise_for_status()
+
+    # Out of retries; raise something meaningful
+    if last_response is not None:
+        last_response.raise_for_status()
+    raise RuntimeError(f"Failed to fetch {url} (no response)")
 
 
 def _normalize_symbol(s: str) -> str:
@@ -102,10 +176,7 @@ def tickers_nasdaq100() -> List[str]:
     html = _fetch_html("https://en.wikipedia.org/wiki/Nasdaq-100")
     tables = pd.read_html(html, flavor="lxml")
     # Prefer a table with a 'Ticker' column; some revisions use 'Ticker' or 'Symbol'.
-    df = next(
-        (t for t in tables if any(c in t.columns for c in ("Ticker", "Symbol"))),
-        None,
-    )
+    df = next((t for t in tables if any(c in t.columns for c in ("Ticker", "Symbol"))), None)
     if df is None:
         raise RuntimeError("Could not find Nasdaq-100 table with 'Ticker' or 'Symbol' column.")
     col = "Ticker" if "Ticker" in df.columns else "Symbol"
@@ -118,15 +189,12 @@ def tickers_c25() -> List[str]:
     html = _fetch_html("https://en.wikipedia.org/wiki/OMX_Copenhagen_25")
     tables = pd.read_html(html, flavor="lxml")
     # Common column names: 'Ticker symbol', sometimes 'Symbol'.
-    df = next(
-        (t for t in tables if any(c in t.columns for c in ("Ticker symbol", "Symbol"))),
-        None,
-    )
+    df = next((t for t in tables if any(c in t.columns for c in ("Ticker symbol", "Symbol"))), None)
     if df is None:
         raise RuntimeError("Could not find C25 table with 'Ticker symbol' or 'Symbol'.")
     col = "Ticker symbol" if "Ticker symbol" in df.columns else "Symbol"
     # Wikipedia often has spaces in Danish tickers; replace with hyphen, then normalize dots.
-    tickers = []
+    tickers: List[str] = []
     for s in df[col].astype(str).tolist():
         s = s.strip().replace(" ", "-")
         s = _normalize_symbol(s)
