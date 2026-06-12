@@ -12,6 +12,10 @@ from finviz_scraper.get_tickers import (
     tickers_other,
     tickers_sp500,
 )
+from finviz_scraper.logging import get_log
+
+
+log = get_log()
 
 
 TICKER_SOURCES: dict[str, Callable[[], list[str]]] = {
@@ -48,4 +52,4 @@ def main() -> None:
     for index in args.indexes:
         export_index(index)
     elapsed_seconds = time.monotonic() - start_time
-    print(f"Completed in {format_elapsed(elapsed_seconds)}")
+    log.info("Completed in %s", format_elapsed(elapsed_seconds))
