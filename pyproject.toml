@@ -3,7 +3,7 @@ name = "finviz-scraper"
 version = "0.1.0"
 description = "Simple scraper for Finviz fundamentals data."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "beautifulsoup4==4.12.2",
     "finviz-data @ git+https://github.com/diversen/finviz-data",
