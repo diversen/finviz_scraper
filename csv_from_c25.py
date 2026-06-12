@@ -1,10 +1,5 @@
-from finviz_scraper.get_tickers import tickers_c25
-from finviz_scraper.finviz import get_tickers_df, export_to_csv
-from datetime import datetime
+from finviz_scraper.cli import c25
 
-today = datetime.today().strftime("%Y-%m-%d")
 
-tickers = tickers_c25()
-df = get_tickers_df(tickers)
-
-export_to_csv(df, "./csv/" + today + "/c25.csv")
+if __name__ == "__main__":
+    c25()

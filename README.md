@@ -4,17 +4,13 @@ Some simple script for fetching stock data from finviz.com and export the data t
 
 It uses this small lib [finviz-data](https://github.com/diversen/finviz-data) for fetching and extracting the data.
 
-## Installl
+## Install
 
     git clone https://github.com/diversen/finviz_scraper
 
     cd finviz_scraper
 
-    virtualenv venv
-
-    source venv/bin/activate
-
-    pip install -r requirements.txt
+    uv sync
 
     cp settings.py-dist settings.py
 
@@ -22,8 +18,8 @@ It uses this small lib [finviz-data](https://github.com/diversen/finviz-data) fo
 
 Save sp500 as a CSV file in the folder `./csv`
 
-    python csv_from_sp500.py
+    uv run python csv_from_sp500.py
 
 Or save nasdaq symbols as a CSV file in `./csv`:
 
-    python csv_from_nasdaq.py
+    uv run python csv_from_nasdaq.py
