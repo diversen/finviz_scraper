@@ -5,12 +5,15 @@ description = "Simple scraper for Finviz fundamentals data."
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 dependencies = [
-    "beautifulsoup4==4.12.2",
-    "finviz-data @ git+https://github.com/diversen/finviz-data",
-    "lxml==6.0.0",
-    "pandas==2.3.0",
-    "requests==2.31.0",
+    "beautifulsoup4>=4,<5",
+    "finviz-data>=1,<2",
+    "lxml>=6,<7",
+    "pandas>=2,<3",
+    "requests>=2,<3",
 ]
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+finviz-data = { git = "https://github.com/diversen/finviz-data", tag = "v1.2.2" }
