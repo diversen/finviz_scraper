@@ -28,6 +28,12 @@ def get_tickers_df(tickers, max_tickers=False):
     back_off_time = settings["back_off_time"]  # Initial backoff time in seconds
 
     df = pd.DataFrame()
+    total_tickers = len(tickers)
+    if max_tickers:
+        total_tickers = min(total_tickers, max_tickers)
+
+    def log_progress(processed_tickers):
+        log.info("Processed %s out of %s tickers", processed_tickers, total_tickers)
 
     for ticker in tickers:
         try:
@@ -36,6 +42,7 @@ def get_tickers_df(tickers, max_tickers=False):
                 log.debug("Skipping previously failed ticker {}".format(ticker))
                 skipped_tickers += 1
                 n += 1
+                log_progress(n)
                 if max_tickers and n >= max_tickers:
                     break
                 continue
@@ -87,6 +94,7 @@ def get_tickers_df(tickers, max_tickers=False):
                 back_off_time = max_back_off_time
 
         n += 1
+        log_progress(n)
         if max_tickers and n >= max_tickers:
             break
 
