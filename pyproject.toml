@@ -1,6 +1,6 @@
 [project]
 name = "finviz-scraper"
-version = "2.1.2"
+version = "2.1.3"
 description = "Simple scraper for Finviz fundamentals data."
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
