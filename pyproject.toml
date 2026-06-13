@@ -16,4 +16,4 @@ dependencies = [
 package = false
 
 [tool.uv.sources]
-finviz-data = { git = "https://github.com/diversen/finviz-data", tag = "v1.2.2" }
+finviz-data = { git = "https://github.com/diversen/finviz-data", branch = "main" }
