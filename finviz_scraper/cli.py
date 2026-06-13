@@ -31,7 +31,9 @@ TICKER_SOURCES: dict[str, Callable[[], list[str]]] = {
 def export_index(name: str) -> None:
     fetch_tickers = TICKER_SOURCES[name]
     today = datetime.today().strftime("%Y-%m-%d")
-    df = get_tickers_df(fetch_tickers())
+    tickers = fetch_tickers()
+    log.info("Beginning %s index with %s tickers", name, len(tickers))
+    df = get_tickers_df(tickers)
     export_to_csv(df, f"./csv/{today}/{name}.csv")
 
 

@@ -17,6 +17,8 @@ def get_tickers_df(tickers, max_tickers=False):
     """Get tickers as a dataframe with exponential backoff on failure."""
 
     n = 0
+    successful_tickers = 0
+    failed_tickers = 0
     back_off_time = settings["back_off_time"]  # Initial backoff time in seconds
 
     df = pd.DataFrame()
@@ -43,11 +45,13 @@ def get_tickers_df(tickers, max_tickers=False):
             company = finviz_data.get_company_info(soup)
             data = {**company, **data}
             df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
+            successful_tickers += 1
 
             # Reset backoff time after successful fetch
             back_off_time = settings["back_off_time"]
 
         except Exception as e:
+            failed_tickers += 1
 
             log.warning(
                 "Failed fetching {}, backing off for {} seconds".format(
@@ -67,6 +71,12 @@ def get_tickers_df(tickers, max_tickers=False):
         n += 1
         if max_tickers and n >= max_tickers:
             break
+
+    log.info(
+        "Fetched tickers: %s successful, %s failed",
+        successful_tickers,
+        failed_tickers,
+    )
 
     return df
 
