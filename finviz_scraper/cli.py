@@ -15,6 +15,7 @@ from finviz_scraper.get_tickers import (
     tickers_sp500,
 )
 from finviz_scraper.logging import get_log
+from finviz_scraper.mail import send_report
 
 
 log = get_log()
@@ -39,13 +40,23 @@ def export_index(name: str, output_dir: str) -> pd.DataFrame:
     return df
 
 
-def export_combined(index_dfs: list[pd.DataFrame], output_dir: str) -> None:
+def fetch_summary_line(summary: dict[str, int]) -> str:
+    return (
+        "Fetched tickers: "
+        f"{summary['successful']} successful, "
+        f"{summary['failed']} failed, "
+        f"{summary['skipped']} skipped"
+    )
+
+
+def export_combined(index_dfs: list[pd.DataFrame], output_dir: str) -> int:
     combined_df = pd.concat(index_dfs, ignore_index=True)
     if "Ticker" in combined_df.columns:
         combined_df = combined_df.drop_duplicates(subset="Ticker", keep="first")
 
     export_to_csv(combined_df, f"{output_dir}/combined.csv")
     log.info("Exported combined CSV with %s rows", len(combined_df))
+    return len(combined_df)
 
 
 def format_elapsed(seconds: float) -> str:
@@ -66,10 +77,23 @@ def main() -> None:
     today = datetime.today().strftime("%Y-%m-%d")
     output_dir = f"./csv/{today}"
     index_dfs = []
+    fetch_summary = {"successful": 0, "failed": 0, "skipped": 0}
     for index in args.indexes:
-        index_dfs.append(export_index(index, output_dir))
+        df = export_index(index, output_dir)
+        index_dfs.append(df)
+        df_fetch_summary = df.attrs.get("fetch_summary", {})
+        for key in fetch_summary:
+            fetch_summary[key] += df_fetch_summary.get(key, 0)
+
     if len(index_dfs) > 1:
-        export_combined(index_dfs, output_dir)
+        log.info(fetch_summary_line(fetch_summary))
+    report_lines = [fetch_summary_line(fetch_summary)]
+    if len(index_dfs) > 1:
+        combined_rows = export_combined(index_dfs, output_dir)
+        report_lines.append(f"Exported combined CSV with {combined_rows} rows")
 
     elapsed_seconds = time.monotonic() - start_time
-    log.info("Completed in %s", format_elapsed(elapsed_seconds))
+    elapsed = format_elapsed(elapsed_seconds)
+    log.info("Completed in %s", elapsed)
+    report_lines.append(f"Completed in {elapsed}")
+    send_report(report_lines)

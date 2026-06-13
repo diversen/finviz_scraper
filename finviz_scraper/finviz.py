@@ -104,6 +104,11 @@ def get_tickers_df(tickers, max_tickers=False):
         failed_tickers,
         skipped_tickers,
     )
+    df.attrs["fetch_summary"] = {
+        "successful": successful_tickers,
+        "failed": failed_tickers,
+        "skipped": skipped_tickers,
+    }
 
     return df
 

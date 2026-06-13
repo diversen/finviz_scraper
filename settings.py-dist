@@ -2,5 +2,17 @@ settings = {
     "back_off_time": 5,  # initial exponential back off time
     "sleep_min": 1,  # minimum sleep time
     "sleep_max": 3,  # maximum sleep time
-    "max_back_off_time": 30, # max back off time
+    "max_back_off_time": 15, # max back off time
+    "smtp": {
+        "host": "smtp-relay.brevo.com",
+        "port": 587,
+        "username": "email@test.com",
+        "password": "password",
+        "from": "mail@mail.com",
+        "to": ["to@test.com"],
+        "subject": "Finviz scraper report",
+        "use_tls": True,
+        "use_ssl": False,
+        "timeout": 30,
+    },
 }

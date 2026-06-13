@@ -32,3 +32,23 @@ This creates `sp500.csv`, `nasdaq100.csv`, and a de-duplicated `combined.csv`
 in `./csv/YYYY-MM-DD/`.
 
 Available indexes are `all`, `c25`, `nasdaq`, `nasdaq100`, `other`, and `sp500`.
+
+## SMTP report
+
+Add SMTP settings in `settings.py` to send a plain-text report when the run
+finishes. Leave `host`, `from`, or `to` empty to skip sending mail.
+
+```python
+"smtp": {
+    "host": "smtp.example.com",
+    "port": 587,
+    "username": "user@example.com",
+    "password": "password",
+    "from": "user@example.com",
+    "to": ["recipient@example.com"],
+    "subject": "Finviz scraper report",
+    "use_tls": True,
+    "use_ssl": False,
+    "timeout": 30,
+},
+```
