@@ -67,6 +67,7 @@ def get_tickers_df(tickers, max_tickers=False):
             back_off_time = settings["back_off_time"]
 
         except Exception as e:
+            print(html)
             failed_tickers += 1
             sql_cache.set(_failed_ticker_key(ticker), str(e))
 

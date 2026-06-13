@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import ftplib
 import hashlib
-import io
 import os
 import time
 from pathlib import Path
@@ -36,6 +34,9 @@ _session.headers.update(
 # Gentle pacing to avoid request bursts
 _last_request_ts = 0.0
 _MIN_INTERVAL_SECONDS = 1.5
+
+NASDAQ_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt"
+OTHER_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/otherlisted.txt"
 
 
 def _cache_path(url: str) -> Path:
@@ -103,28 +104,14 @@ def _normalize_symbol(s: str) -> str:
     return s.strip().replace(".", "-")
 
 
-# ---------- NASDAQ FTP sources ----------
-
-def _ftp_retrieve_bytes(path: str, filename: str) -> bytes:
-    ftp = ftplib.FTP("ftp.nasdaqtrader.com", timeout=30)
-    try:
-        ftp.login()
-        ftp.cwd(path)
-        buf = io.BytesIO()
-        ftp.retrbinary(f"RETR {filename}", buf.write)
-        return buf.getvalue()
-    finally:
-        try:
-            ftp.quit()
-        except Exception:
-            ftp.close()
+# ---------- NASDAQ Trader sources ----------
 
 
 def tickers_nasdaq() -> List[str]:
     """
     Downloads list of tickers currently listed on NASDAQ (from nasdaqlisted.txt).
     """
-    raw = _ftp_retrieve_bytes("SymbolDirectory", "nasdaqlisted.txt").decode(errors="ignore")
+    raw = _fetch_html(NASDAQ_LISTED_URL)
     symbols: List[str] = []
     for line in raw.splitlines():
         # Skip footer line and header
@@ -141,9 +128,9 @@ def tickers_nasdaq() -> List[str]:
 
 def tickers_other() -> List[str]:
     """
-    Downloads list of tickers from otherlisted.txt (NYSE/AMEX etc.) on NASDAQ FTP.
+    Downloads list of tickers from otherlisted.txt (NYSE/AMEX etc.) on NASDAQ Trader.
     """
-    raw = _ftp_retrieve_bytes("SymbolDirectory", "otherlisted.txt").decode(errors="ignore")
+    raw = _fetch_html(OTHER_LISTED_URL)
     symbols: List[str] = []
     for line in raw.splitlines():
         if line.startswith("File Creation Time") or line.startswith("ACT Symbol|"):
