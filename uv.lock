@@ -107,7 +107,7 @@ wheels = [
 [[package]]
 name = "finviz-data"
 version = "1.2.1"
-source = { git = "https://github.com/diversen/finviz-data#776dc481f198a8d636b9ae90ff145e1aa551872c" }
+source = { git = "https://github.com/diversen/finviz-data#f34f87d46908e5732d3f3a76fdb36f60bc5cfc70" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "certifi" },
