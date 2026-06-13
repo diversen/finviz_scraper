@@ -3,7 +3,7 @@ from finviz_scraper.logging import get_log
 import pandas as pd
 import time
 import os
-from sqlite_cache.sqlite_cache import SqliteCache
+from finviz_scraper.sqlite_cache import SqliteCache
 from bs4 import BeautifulSoup
 import random
 from settings import settings

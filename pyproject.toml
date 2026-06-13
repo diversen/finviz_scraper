@@ -9,7 +9,6 @@ dependencies = [
     "finviz-data @ git+https://github.com/diversen/finviz-data",
     "lxml==6.0.0",
     "pandas==2.3.0",
-    "python-sqlite-cache==0.0.2",
     "requests==2.31.0",
 ]
 

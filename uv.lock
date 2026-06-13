@@ -128,7 +128,6 @@ dependencies = [
     { name = "finviz-data" },
     { name = "lxml" },
     { name = "pandas" },
-    { name = "python-sqlite-cache" },
     { name = "requests" },
 ]
 
@@ -138,7 +137,6 @@ requires-dist = [
     { name = "finviz-data", git = "https://github.com/diversen/finviz-data" },
     { name = "lxml", specifier = "==6.0.0" },
     { name = "pandas", specifier = "==2.3.0" },
-    { name = "python-sqlite-cache", specifier = "==0.0.2" },
     { name = "requests", specifier = "==2.31.0" },
 ]
 
@@ -284,15 +282,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892, upload-time = "2024-03-01T18:36:18.57Z" },
-]
-
-[[package]]
-name = "python-sqlite-cache"
-version = "0.0.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/73/db/af5fc7bb8339dffb176d34bcebea09a727f7813301509bcbc76e95b99acb/python-sqlite-cache-0.0.2.tar.gz", hash = "sha256:de6cc35cd280ed682e37d6c0f46963e254a62eabb06afc9698ed0c37f01146a0", size = 3774, upload-time = "2019-11-04T05:38:29.303Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/ea/27f943439deb585b8610bcfaf4de96043f604ef5ba821abd25db5c633b1f/python_sqlite_cache-0.0.2-py3-none-any.whl", hash = "sha256:b04ba94055ca2746937cb3f0cea651a5de9ed08a4a7d05fe67d323430f93cf33", size = 4531, upload-time = "2019-11-04T05:38:27.768Z" },
 ]
 
 [[package]]
