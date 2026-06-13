@@ -11,6 +11,11 @@ from settings import settings
 
 sql_cache = SqliteCache("cache")
 log = get_log()
+FAILED_TICKER_KEY_PREFIX = "failed_ticker:"
+
+
+def _failed_ticker_key(ticker):
+    return "{}{}".format(FAILED_TICKER_KEY_PREFIX, ticker)
 
 
 def get_tickers_df(tickers, max_tickers=False):
@@ -19,12 +24,22 @@ def get_tickers_df(tickers, max_tickers=False):
     n = 0
     successful_tickers = 0
     failed_tickers = 0
+    skipped_tickers = 0
     back_off_time = settings["back_off_time"]  # Initial backoff time in seconds
 
     df = pd.DataFrame()
 
     for ticker in tickers:
         try:
+            failed_ticker_key = _failed_ticker_key(ticker)
+            if sql_cache.get(failed_ticker_key):
+                log.debug("Skipping previously failed ticker {}".format(ticker))
+                skipped_tickers += 1
+                n += 1
+                if max_tickers and n >= max_tickers:
+                    break
+                continue
+
             html = sql_cache.get(ticker)
             if not html:
                 log.debug("Fetching {}".format(ticker))
@@ -46,12 +61,14 @@ def get_tickers_df(tickers, max_tickers=False):
             data = {**company, **data}
             df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
             successful_tickers += 1
+            sql_cache.delete(failed_ticker_key)
 
             # Reset backoff time after successful fetch
             back_off_time = settings["back_off_time"]
 
         except Exception as e:
             failed_tickers += 1
+            sql_cache.set(_failed_ticker_key(ticker), str(e))
 
             log.warning(
                 "Failed fetching {}, backing off for {} seconds".format(
@@ -73,9 +90,10 @@ def get_tickers_df(tickers, max_tickers=False):
             break
 
     log.info(
-        "Fetched tickers: %s successful, %s failed",
+        "Fetched tickers: %s successful, %s failed, %s skipped",
         successful_tickers,
         failed_tickers,
+        skipped_tickers,
     )
 
     return df
