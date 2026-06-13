@@ -28,4 +28,7 @@ Save two indexes in one run:
 
     uv run python finviz_csv.py sp500 nasdaq100
 
+This creates `sp500.csv`, `nasdaq100.csv`, and a de-duplicated `combined.csv`
+in `./csv/YYYY-MM-DD/`.
+
 Available indexes are `all`, `c25`, `nasdaq`, `nasdaq100`, `other`, and `sp500`.
