@@ -24,7 +24,7 @@ def generate_log_dir():
 
 
 def get_file_handler(level: Any):
-    fh = RotatingFileHandler("logs/main.log", maxBytes=5000000, backupCount=3)
+    fh = RotatingFileHandler("logs/main.log", maxBytes=50000000, backupCount=5)
     fh.setLevel(level)
     fh.setFormatter(formatter)
     return fh
