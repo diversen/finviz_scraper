@@ -127,11 +127,15 @@ wheels = [
 
 [[package]]
 name = "finviz-data"
-version = "1.3.0"
-source = { git = "https://github.com/diversen/finviz-data?branch=main#1e3a9b39204cc01c4f740b856648b463ae02f7b8" }
+version = "1.3.1"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "curl-cffi" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0d/15/3eb78b3ba9d05d65575a1f80a2605caa1a27da80dcb6a61e52565618c243/finviz_data-1.3.1.tar.gz", hash = "sha256:c014e7fa9af9bf5ba496d0e2c6b406156b46ef417bf4ba57083ec901b7064272", size = 5337, upload-time = "2026-06-29T14:16:55.768Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/c1/767bce20561af654b307979b154b0c02b7fb40f4211d76e8f973b85327a1/finviz_data-1.3.1-py3-none-any.whl", hash = "sha256:fc32b13551ff5c85b80ad943e5eeba48337d392d9b496ae6eedd5fa9cc3bd201", size = 4074, upload-time = "2026-06-29T14:16:56.844Z" },
 ]
 
 [[package]]
@@ -149,7 +153,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4,<5" },
-    { name = "finviz-data", git = "https://github.com/diversen/finviz-data?branch=main" },
+    { name = "finviz-data", specifier = ">=1,<2" },
     { name = "lxml", specifier = ">=6,<7" },
     { name = "pandas", specifier = ">=2,<3" },
     { name = "requests", specifier = ">=2,<3" },
