@@ -74,16 +74,18 @@ def get_tickers_df(tickers, max_tickers=False):
             back_off_time = settings["back_off_time"]
 
         except Exception as e:
-            print(html)
             failed_tickers += 1
-            sql_cache.set(_failed_ticker_key(ticker), str(e))
-
-            log.warning(
-                "Failed fetching {}, backing off for {} seconds".format(
-                    ticker, back_off_time
-                )
+            log.exception(
+                "Failed fetching %s, backing off for %s seconds",
+                ticker,
+                back_off_time,
             )
-            log.exception(e)
+
+            try:
+                sql_cache.set(_failed_ticker_key(ticker), str(e))
+            except Exception:
+                log.exception("Failed to cache failure state for %s", ticker)
+
             time.sleep(back_off_time)
 
             # Exponential backoff

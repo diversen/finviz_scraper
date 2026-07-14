@@ -33,10 +33,26 @@ TICKER_SOURCES: dict[str, Callable[[], list[str]]] = {
 
 def export_index(name: str, output_dir: str) -> pd.DataFrame:
     fetch_tickers = TICKER_SOURCES[name]
-    tickers = fetch_tickers()
+    try:
+        tickers = fetch_tickers()
+    except Exception:
+        log.exception("Failed to fetch %s ticker list", name)
+        raise
+
     log.info("Beginning %s index with %s tickers", name, len(tickers))
-    df = get_tickers_df(tickers)
-    export_to_csv(df, f"{output_dir}/{name}.csv")
+    try:
+        df = get_tickers_df(tickers)
+    except Exception:
+        log.exception("Failed processing %s index", name)
+        raise
+
+    output_path = f"{output_dir}/{name}.csv"
+    try:
+        export_to_csv(df, output_path)
+    except Exception:
+        log.exception("Failed exporting %s CSV to %s", name, output_path)
+        raise
+
     return df
 
 
@@ -54,7 +70,13 @@ def export_combined(index_dfs: list[pd.DataFrame], output_dir: str) -> int:
     if "Ticker" in combined_df.columns:
         combined_df = combined_df.drop_duplicates(subset="Ticker", keep="first")
 
-    export_to_csv(combined_df, f"{output_dir}/combined.csv")
+    output_path = f"{output_dir}/combined.csv"
+    try:
+        export_to_csv(combined_df, output_path)
+    except Exception:
+        log.exception("Failed exporting combined CSV to %s", output_path)
+        raise
+
     log.info("Exported combined CSV with %s rows", len(combined_df))
     return len(combined_df)
 

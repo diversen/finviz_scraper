@@ -5,14 +5,19 @@ from __future__ import annotations
 import hashlib
 import os
 import time
+from io import StringIO
 from pathlib import Path
 from typing import List
 
 import pandas as pd
 import requests
 
+from finviz_scraper.logging import get_log
+
 
 # ---------- helpers ----------
+
+log = get_log()
 
 # Identify your script + contact (recommended for automated access).
 _UA = "finviz_scraper/1.0 (contact: you@example.com) requests/2.x"
@@ -37,6 +42,7 @@ _MIN_INTERVAL_SECONDS = 1.5
 
 NASDAQ_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt"
 OTHER_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/otherlisted.txt"
+NASDAQ100_URL = "https://en.wikipedia.org/wiki/List_of_NASDAQ-100_companies"
 
 
 def _cache_path(url: str) -> Path:
@@ -69,9 +75,17 @@ def _fetch_html(url: str) -> str:
     # 3) Retry with backoff
     backoff = 5.0
     last_response: requests.Response | None = None
+    last_error: requests.RequestException | None = None
 
     for _ in range(5):
-        r = _session.get(url, timeout=30)
+        try:
+            r = _session.get(url, timeout=30)
+        except requests.RequestException as exc:
+            last_error = exc
+            time.sleep(int(backoff))
+            backoff = min(backoff * 2, 120)
+            continue
+
         last_response = r
         _last_request_ts = time.time()
 
@@ -94,8 +108,12 @@ def _fetch_html(url: str) -> str:
         r.raise_for_status()
 
     # Out of retries; raise something meaningful
+    if p.exists():
+        return p.read_text(encoding="utf-8", errors="ignore")
     if last_response is not None:
         last_response.raise_for_status()
+    if last_error is not None:
+        raise last_error
     raise RuntimeError(f"Failed to fetch {url} (no response)")
 
 
@@ -149,7 +167,7 @@ def tickers_other() -> List[str]:
 def tickers_sp500() -> List[str]:
     """Downloads list of tickers currently listed in the S&P 500 from Wikipedia."""
     html = _fetch_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
-    tables = pd.read_html(html, flavor="lxml")
+    tables = pd.read_html(StringIO(html), flavor="lxml")
     # Find the table that has a 'Symbol' column.
     df = next((t for t in tables if "Symbol" in t.columns), None)
     if df is None:
@@ -160,8 +178,8 @@ def tickers_sp500() -> List[str]:
 
 def tickers_nasdaq100() -> List[str]:
     """Downloads list of tickers currently listed in the Nasdaq-100 from Wikipedia."""
-    html = _fetch_html("https://en.wikipedia.org/wiki/Nasdaq-100")
-    tables = pd.read_html(html, flavor="lxml")
+    html = _fetch_html(NASDAQ100_URL)
+    tables = pd.read_html(StringIO(html), flavor="lxml")
     # Prefer a table with a 'Ticker' column; some revisions use 'Ticker' or 'Symbol'.
     df = next((t for t in tables if any(c in t.columns for c in ("Ticker", "Symbol"))), None)
     if df is None:
@@ -174,7 +192,7 @@ def tickers_nasdaq100() -> List[str]:
 def tickers_c25() -> List[str]:
     """Downloads list of tickers currently listed in the OMX Copenhagen 25 from Wikipedia."""
     html = _fetch_html("https://en.wikipedia.org/wiki/OMX_Copenhagen_25")
-    tables = pd.read_html(html, flavor="lxml")
+    tables = pd.read_html(StringIO(html), flavor="lxml")
     # Common column names: 'Ticker symbol', sometimes 'Symbol'.
     df = next((t for t in tables if any(c in t.columns for c in ("Ticker symbol", "Symbol"))), None)
     if df is None:
@@ -192,9 +210,19 @@ def tickers_c25() -> List[str]:
 # ---------- Combined ----------
 
 def tickers_all() -> List[str]:
-    sp500 = tickers_sp500()
-    nasdaq = tickers_nasdaq()
-    others = tickers_other()
-    c25 = tickers_c25()
+    sources = [
+        ("sp500", tickers_sp500),
+        ("nasdaq", tickers_nasdaq),
+        ("other", tickers_other),
+        ("c25", tickers_c25),
+    ]
+    ticker_groups: list[str] = []
+    for name, fetch_tickers in sources:
+        try:
+            ticker_groups.extend(fetch_tickers())
+        except Exception:
+            log.exception("Failed to fetch %s ticker list while building all", name)
+            raise
+
     # Combine, de-duplicate, and sort
-    return sorted(set(sp500 + nasdaq + others + c25))
+    return sorted(set(ticker_groups))
